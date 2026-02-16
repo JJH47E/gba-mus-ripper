@@ -28,6 +28,8 @@
 #include <cstring>
 #include "midi.hpp"
 
+uint16_t bit_offset = 8;
+
 // Constructor : Initialise the MIDI object
 MIDI::MIDI(uint16_t delta_time)
 {
@@ -71,7 +73,7 @@ void MIDI::write(FILE *out)
 		0x06000000,
 		0x0000,
 		0x0100,
-		(delta_time_per_beat << 8) | (delta_time_per_beat >> 8)
+		static_cast<uint16_t>((delta_time_per_beat << bit_offset) | (delta_time_per_beat >> bit_offset))
 	};
 	fwrite(&mthd_chunk, 1, 14, out);
 

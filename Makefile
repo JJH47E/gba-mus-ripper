@@ -1,16 +1,16 @@
 # Points to C++ compiler, use C++11 standard
-CPPC=x86_64-w64-mingw32-g++.exe -std=gnu++11
+# CPPC=x86_64-w64-mingw32-g++.exe -std=gnu++11
 # Points to C compiler, use C99 standard
-CC=x86_64-w64-mingw32-gcc.exe -std=c99
+# CC=x86_64-w64-mingw32-gcc.exe -std=c99
 
 # On linux
-# CPPC=/usr/bin/g++ -std=gnu++11
-# CC=/usr/bin/gcc -std=c99
+CPPC=/usr/bin/g++ -std=gnu++11
+CC=/usr/bin/gcc -std=c99
 
 # Parameters used for compilation
 FLAGS=-Wall -fdata-sections -ffunction-sections -fmax-errors=5 -Os
 # Additional parameters used for linking whole programs
-WHOLE=-s -fwhole-program -static
+WHOLE=-s -fwhole-program
 
 all: $(shell mkdir build) $(shell mkdir out) out/sappy_detector out/song_ripper out/sound_font_ripper out/gba_mus_ripper
 
