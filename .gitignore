@@ -19,3 +19,6 @@ build/
 
 *.gba
 
+# OS files
+
+.DS_Store
