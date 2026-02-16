@@ -528,7 +528,7 @@ uint32_t ripSong(const RipSongOptions& options)
 		exit(0);
 	}
 
-	bank_number = atoi(options.bank_number.c_str() + 2);
+	bank_number = options.bank_number;
 	bank_used = true;
 	rc = options.rc;
 	gs = options.gs;
@@ -544,12 +544,14 @@ uint32_t ripSong(const RipSongOptions& options)
 	}
 
 	int track_amnt = fgetc(inGBA);
+	printf("DEBUG: Byte at 0x%08X is 0x%02X (%d decimal)\n", base_address, track_amnt, track_amnt);
 	if (track_amnt < 1 || track_amnt > 16)
 	{
 		fprintf(stderr, "Invalid amount of tracks %d! (must be 1-16).\n", track_amnt);
 		exit(0);
 	}
 	printf("%u tracks.\n", track_amnt);
+	return 0;
 
 	// Open output file once we know the pointer points to correct data
 	//(this avoids creating blank files when there is an error)

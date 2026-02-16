@@ -307,20 +307,21 @@ int main(int argc, char *const argv[])
 			rip_options.out_mid_filepath += "/song" + dec4(i) + ".mid";
 			rip_options.song_address = "0x" + hex(song_list[i]);
 			rip_options.rc = rc;
-			rip_options.gs = xg ? false : true; // If xg is true, gs is false, otherwise gs is true
-			rip_options.xg = xg;
+			rip_options.gs = rc ? false : (!xg); // If xg is true, gs is false, otherwise gs is true
+			rip_options.xg = rc ? false : xg;
 			rip_options.lv = !raw;
 			rip_options.sv = !raw;
 			if (!sb) {
-				rip_options.bank_number = std::to_string(bank_index);
+				rip_options.bank_number = bank_index;
 				rip_options.bank_used = true;
 			} else {
 				rip_options.bank_used = false;
 			}
 			
 			printf("Song %u\n", i);
-			printf("Calling ripSong for song %u at address 0x%x\n", i, song_list[i]);
+			printf("Calling ripSong for song %u at address %s\n", i, rip_options.song_address.c_str());
 			ripSong(rip_options);
+			return 0;
 		}
 	}
 	delete[] sound_bank_index_list;

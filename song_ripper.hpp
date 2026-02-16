@@ -9,7 +9,7 @@ struct RipSongOptions
     std::string in_gba_filepath;
     std::string out_mid_filepath;
     std::string song_address;
-    std::string bank_number;
+    int bank_number;
     bool bank_used;
     bool rc; // Rearrange Channels
     bool gs; // GS system exclusive message
