@@ -105,7 +105,7 @@ static void parse_args(const int argc, char *const args[])
 				raw = true;
             else if (!strcmp(args[i], "-o") && argc >= i + 1)
             {
-                outPath = args[i + 1];
+                outPath = args[++i];
             }
 			else
 			{
@@ -130,7 +130,7 @@ static void parse_args(const int argc, char *const args[])
 			name = inGBA_path.substr(separator_index, inGBA_path.find_last_of('.') - separator_index);
 
 			// Path where the input GBA file is located
-			outPath = inGBA_path.substr(0, separator_index);
+			outPath = inGBA_path.substr(0, separator_index) + '.';
 			path_found = true;
 		}
 		else if (!song_tbl_found)
