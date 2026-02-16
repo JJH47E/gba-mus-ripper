@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include "song_ripper.hpp"
 
 class Note;
 
@@ -52,25 +53,6 @@ static MIDI midi(24);
 static FILE *inGBA;
 
 static void process_event(int track);
-
-static void print_instructions()
-{
-	puts(
-		"Rips sequence data from a GBA game using Sappy sound engine to MIDI (.mid) format.\n"
-		"\nUsage: song_riper infile.gba outfile.mid song_address [-b1 -gm -gs -xg]\n"
-		"-b : Bank: forces all patches to be in the specified bank (0-127).\n"
-		"In General MIDI, channel 10 is reserved for drums.\n"
-		"Unfortunately, we do not want to use any \"drums\" in the output file.\n"
-		"I have 3 modes to fix this problem.\n"
-		"-rc : Rearrange Channels. This will avoid using the channel 10, and use it at last ressort only if all 16 channels should be used\n"
-		"-gs : This will send a GS system exclusive message to tell the player channel 10 is not drums.\n"
-		"-xg : This will send a XG system exclusive message, and force banks number which will disable \"drums\".\n"
-		"-lv : Linearise volume and velocities. This should be used to have the output \"sound\" like the original song, but shouldn't be used to get an exact dump of sequence data."
-		"-sv : Simulate vibrato. This will insert controllers in real time to simulate a vibrato, instead of just when commands are given. Like -lv, this should be used to have the output \"sound\" like the original song, but shouldn't be used to get an exact dump of sequence data.\n\n"
-		"It is possible, but not recommended, to use more than one of these flags at a time.\n"
-	);
-	exit(0);
-}
 
 static void add_simultaneous_note()
 {
@@ -534,53 +516,26 @@ static void process_event(int track)
 	}
 }
 
-static uint32_t parseArguments(const int argv, const char *const args[])
-{
-	if (argv < 3) print_instructions();
-
-	// Open the input and output files
-	inGBA = fopen(args[0], "rb");
-	if (!inGBA)
-	{
-		fprintf(stderr, "Can't open file %s for reading.\n", args[0]);
-		exit(0);
-	}
-
-	for (int i = 3; i < argv; i++)
-	{
-		if (args[i][0] == '-')
-		{
-			if (args[i][1] == 'b')
-			{
-				if (strlen(args[i]) < 3) print_instructions();
-				bank_number = atoi(args[i] + 2);
-				bank_used = true;
-			}
-			else if (args[i][1] == 'r' && args[i][2] == 'c')
-				rc = true;
-			else if (args[i][1] == 'g' && args[i][2] == 's')
-				gs = true;
-			else if (args[i][1] == 'x' && args[i][2] == 'g')
-				xg = true;
-			else if (args[i][1] == 'l' && args[i][2] == 'v')
-				lv = true;
-			else if (args[i][1] == 's' && args[i][2] == 'v')
-				sv = true;
-			else
-				print_instructions();
-		}
-		else
-			print_instructions();
-	}
-	// Return base address, parsed correctly in both decimal and hex
-	return strtoul(args[2], 0, 0);
-}
-
-int main(int argc, char *argv[])
+uint32_t ripSong(const RipSongOptions& options)
 {
 	FILE *outMID;
 	puts("GBA ROM sequence ripper (c) 2012 Bregalad");
-	uint32_t base_address = parseArguments(argc - 1, argv + 1);
+
+	inGBA = fopen(options.in_gba_filepath.c_str(), "rb");
+	if (!inGBA)
+	{
+		fprintf(stderr, "Can't open file %s for reading.\n", options.in_gba_filepath.c_str());
+		exit(0);
+	}
+
+	bank_number = atoi(options.bank_number.c_str() + 2);
+	bank_used = true;
+	rc = options.rc;
+	gs = options.gs;
+	xg = options.xg;
+	lv = options.lv;
+	sv = options.sv;
+	uint32_t base_address = strtoul(options.song_address.c_str(), 0, 0);
 
 	if (fseek(inGBA, base_address, SEEK_SET))
 	{
@@ -598,10 +553,10 @@ int main(int argc, char *argv[])
 
 	// Open output file once we know the pointer points to correct data
 	//(this avoids creating blank files when there is an error)
-	outMID = fopen(argv[2], "wb");
+	outMID = fopen(options.out_mid_filepath.c_str(), "wb");
 	if (!outMID)
 	{
-		fprintf(stderr, "Can't write to file %s.\n", argv[2]);
+		fprintf(stderr, "Can't write to file %s.\n", options.out_mid_filepath.c_str());
 		exit(0);
 	}
 

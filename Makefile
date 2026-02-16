@@ -12,22 +12,23 @@ FLAGS=-Wall -fdata-sections -ffunction-sections -fmax-errors=5 -Os
 # Additional parameters used for linking whole programs
 WHOLE=-s -fwhole-program
 
-all: $(shell mkdir build) $(shell mkdir out) out/sappy_detector out/song_ripper out/sound_font_ripper out/gba_mus_ripper
+all: $(shell mkdir build) $(shell mkdir out) out/sappy_detector out/sound_font_ripper out/gba_mus_ripper build/midi.o build/song_ripper.o
 
 out/sappy_detector: sappy_detector.c
 	$(CC) $(FLAGS) $(WHOLE) sappy_detector.c -o out/sappy_detector
 
-out/song_ripper: song_ripper.cpp midi.hpp build/midi.o
-	$(CPPC) $(FLAGS) $(WHOLE) song_ripper.cpp build/midi.o -o out/song_ripper
 
 out/sound_font_ripper: build/sound_font_ripper.o build/gba_samples.o build/gba_instr.o build/sf2.o
 	$(CPPC) $(FLAGS) $(WHOLE) build/gba_samples.o build/gba_instr.o build/sf2.o build/sound_font_ripper.o -o out/sound_font_ripper
 
-out/gba_mus_ripper: gba_mus_ripper.cpp hex_string.hpp
-	$(CPPC) $(FLAGS) $(WHOLE) gba_mus_ripper.cpp -o out/gba_mus_ripper
+out/gba_mus_ripper: gba_mus_ripper.cpp hex_string.hpp build/song_ripper.o build/midi.o
+	$(CPPC) $(FLAGS) $(WHOLE) gba_mus_ripper.cpp build/song_ripper.o build/midi.o -o out/gba_mus_ripper
 
 build/midi.o: midi.cpp midi.hpp
 	$(CPPC) $(FLAGS) -c midi.cpp -o build/midi.o
+
+build/song_ripper.o: song_ripper.cpp song_ripper.hpp midi.hpp
+	$(CPPC) $(FLAGS) -c song_ripper.cpp -o build/song_ripper.o
 
 build/gba_samples.o : gba_samples.cpp gba_samples.hpp hex_string.hpp sf2.hpp sf2_types.hpp
 	$(CPPC) $(FLAGS) -c gba_samples.cpp -o build/gba_samples.o

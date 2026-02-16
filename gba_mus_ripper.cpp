@@ -15,6 +15,7 @@
 #include <vector>
 #include <set>
 #include "hex_string.hpp"
+#include "song_ripper.hpp"
 
 #ifndef WIN32
 namespace sappy_detector
@@ -298,27 +299,28 @@ int main(int argc, char *const argv[])
 		if (song_list[i] != song_tbl_end_ptr)
 		{
 			unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-			std::string seq_rip_cmd = prg_prefix + "song_ripper \"" + inGBA_path + "\" \"" + outPath;
-
-			// Add leading zeroes to file name
-			if (sb) seq_rip_cmd += "/soundbank_" + dec4(bank_index);
-			seq_rip_cmd += "/song" + dec4(i) + ".mid\"";
-
-			seq_rip_cmd += " 0x" + hex(song_list[i]);
-			seq_rip_cmd += rc ? " -rc" : (xg ? " -xg": " -gs");
-			if (!raw)
-			{
-				seq_rip_cmd += " -sv";
-				seq_rip_cmd += " -lv";
+			// Construct RipSongOptions
+			RipSongOptions rip_options;
+			rip_options.in_gba_filepath = inGBA_path;
+			rip_options.out_mid_filepath = outPath;
+			if (sb) rip_options.out_mid_filepath += "/soundbank_" + dec4(bank_index);
+			rip_options.out_mid_filepath += "/song" + dec4(i) + ".mid";
+			rip_options.song_address = "0x" + hex(song_list[i]);
+			rip_options.rc = rc;
+			rip_options.gs = xg ? false : true; // If xg is true, gs is false, otherwise gs is true
+			rip_options.xg = xg;
+			rip_options.lv = !raw;
+			rip_options.sv = !raw;
+			if (!sb) {
+				rip_options.bank_number = std::to_string(bank_index);
+				rip_options.bank_used = true;
+			} else {
+				rip_options.bank_used = false;
 			}
-			// Bank number, if banks are not separated
-			if (!sb)
-				seq_rip_cmd += " -b" + std::to_string(bank_index);
-
+			
 			printf("Song %u\n", i);
-
-			printf("DEBUG: Going to call system(%s)\n", seq_rip_cmd.c_str());
-			if (!system(seq_rip_cmd.c_str())) puts("An error occurred while calling song_ripper.");
+			printf("Calling ripSong for song %u at address 0x%x\n", i, song_list[i]);
+			ripSong(rip_options);
 		}
 	}
 	delete[] sound_bank_index_list;
