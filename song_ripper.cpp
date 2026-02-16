@@ -525,7 +525,7 @@ uint32_t ripSong(const RipSongOptions& options)
 	if (!inGBA)
 	{
 		fprintf(stderr, "Can't open file %s for reading.\n", options.in_gba_filepath.c_str());
-		exit(0);
+		return -1;
 	}
 
 	bank_number = options.bank_number;
@@ -540,7 +540,7 @@ uint32_t ripSong(const RipSongOptions& options)
 	if (fseek(inGBA, base_address, SEEK_SET))
 	{
 		fprintf(stderr, "Can't seek to the base address 0x%x.\n", base_address);
-		exit(0);
+		return -1;
 	}
 
 	int track_amnt = fgetc(inGBA);
@@ -548,10 +548,9 @@ uint32_t ripSong(const RipSongOptions& options)
 	if (track_amnt < 1 || track_amnt > 16)
 	{
 		fprintf(stderr, "Invalid amount of tracks %d! (must be 1-16).\n", track_amnt);
-		exit(0);
+		return -1;
 	}
 	printf("%u tracks.\n", track_amnt);
-	return 0;
 
 	// Open output file once we know the pointer points to correct data
 	//(this avoids creating blank files when there is an error)
@@ -559,7 +558,7 @@ uint32_t ripSong(const RipSongOptions& options)
 	if (!outMID)
 	{
 		fprintf(stderr, "Can't write to file %s.\n", options.out_mid_filepath.c_str());
-		exit(0);
+		return -1;
 	}
 
 	printf("Converting...");

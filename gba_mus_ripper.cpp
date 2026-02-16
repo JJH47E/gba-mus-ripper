@@ -321,7 +321,6 @@ int main(int argc, char *const argv[])
 			printf("Song %u\n", i);
 			printf("Calling ripSong for song %u at address %s\n", i, rip_options.song_address.c_str());
 			ripSong(rip_options);
-			return 0;
 		}
 	}
 	delete[] sound_bank_index_list;
